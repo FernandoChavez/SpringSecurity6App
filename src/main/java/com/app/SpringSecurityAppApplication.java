@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
+import java.util.List;
 import java.util.Set;
 
 @SpringBootApplication
@@ -68,9 +69,10 @@ public class SpringSecurityAppApplication {
 
 			//Create Users
 
+			//Password before to encrypt is: 101010
 			UserEntity userFernando = UserEntity.builder()
 					.username("fernando")
-					.password("101010")
+					.password("$2a$10$9ZIHenFYWqw8do7UoTo29esmR4E45nORhHWZWufhwTWA/C/MhBZQO")
 					.isEnabled(true)
 					.accountNoExpired(true)
 					.accountNoLocked(true)
@@ -80,7 +82,7 @@ public class SpringSecurityAppApplication {
 
 			UserEntity userHugo = UserEntity.builder()
 					.username("hugo")
-					.password("hola")
+					.password("$2a$10$9ZIHenFYWqw8do7UoTo29esmR4E45nORhHWZWufhwTWA/C/MhBZQO")
 					.isEnabled(true)
 					.accountNoExpired(true)
 					.accountNoLocked(true)
@@ -90,7 +92,7 @@ public class SpringSecurityAppApplication {
 
 			UserEntity userBrian = UserEntity.builder()
 					.username("brian")
-					.password("brian")
+					.password("$2a$10$9ZIHenFYWqw8do7UoTo29esmR4E45nORhHWZWufhwTWA/C/MhBZQO")
 					.isEnabled(true)
 					.accountNoExpired(true)
 					.accountNoLocked(true)
@@ -100,13 +102,15 @@ public class SpringSecurityAppApplication {
 
 			UserEntity userGissy = UserEntity.builder()
 					.username("Gissy")
-					.password("dulces")
+					.password("$2a$10$9ZIHenFYWqw8do7UoTo29esmR4E45nORhHWZWufhwTWA/C/MhBZQO")
 					.isEnabled(true)
 					.accountNoExpired(true)
 					.accountNoLocked(true)
 					.credentialNoExpired(true)
 					.roles(Set.of(roleAInvited))
 					.build();
+
+			userRepository.saveAll(List.of(userFernando,userGissy,userBrian,userHugo));
 		};
 	}
 }

@@ -1,5 +1,6 @@
 package com.app.config;
 
+import com.app.service.UserDetailServiceImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,6 +16,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
@@ -47,9 +49,13 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(http -> {
                     //El siguiente endpoint será publico
-                    http.requestMatchers(HttpMethod.GET, "/auth/hello").permitAll();
-                    //Eñ soguiente endpoint metemos seguridad, a todos usuarios que tengan el authorities "READ"
-                    http.requestMatchers(HttpMethod.GET, "/auth/hello-secured").hasAuthority("CREATE");
+                    http.requestMatchers(HttpMethod.GET, "/auth/get").permitAll();
+
+                    //Eñ siguiente endpoint metemos seguridad, a todos usuarios que tengan el authorities "READ"
+                    http.requestMatchers(HttpMethod.POST, "/auth/post").hasRole("ADMIN");
+                    http.requestMatchers(HttpMethod.PATCH, "/auth/patch").hasAuthority("REFACTOR");
+                    http.requestMatchers(HttpMethod.PUT, "/auth/put").hasAnyRole("ADMIN", "DEVELOPER");
+                    http.requestMatchers(HttpMethod.DELETE, "/auth/delete").hasAnyAuthority("DELETE");
 
                     //Configurar el resto de endpoints - NO ESPECIFICADOS
                     http.anyRequest().denyAll();
@@ -81,27 +87,29 @@ public class SecurityConfig {
     //Un AuthenticationProvider en Spring Security es un componente responsable de procesar la autenticación de
     // un usuario
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider(UserDetailServiceImpl userDetailService){
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         //Este nos ayuda a encriptar y validar passwords
         provider.setPasswordEncoder((passwordEncoder()));
-        //Este componente nos permite hacer el llamado a la base de datos
-        provider.setUserDetailsService(userDetailsService());
+        //Este componente nos permite hacer el llamado a la base de datos, usando UserDetailService
+        provider.setUserDetailsService(userDetailService);
         return provider;
     }
 
+    /*
     @Bean
     public UserDetailsService userDetailsService(){
         //Spring security valida los usuarios con userDetails y cuando implementemos la base de datos,
         //traemos los usuarios y lo convertimos a un userDetails
-        /*
+
         UserDetails userDetails = User.withUsername("fernando")
                 .password("101010")
                 .roles("ADMIN")
                 .authorities("READ", "CREATE")
                 .build();
 
-        */
+        CREAR USUARIO EN MEMORIA
+
 
         List<UserDetails> userDetailsList = new ArrayList<>();
 
@@ -118,14 +126,23 @@ public class SecurityConfig {
                 .build());
 
         return new InMemoryUserDetailsManager(userDetailsList);
+
+
     }
+    */
 
 
     //NoOpPasswordEncoder esta obsoleto asi que solo se usan para pruebas
     //Usa BCryptPasswordEncoder para produccion ya que nosr permite encriptar
     @Bean
     public PasswordEncoder passwordEncoder(){
-        return NoOpPasswordEncoder.getInstance();
+        return new BCryptPasswordEncoder();
     }
+
+    /*
+    public static void main(String[] args) {
+        System.out.println(new BCryptPasswordEncoder().encode("101010"));
+    }
+    */
 
 }
